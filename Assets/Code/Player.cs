@@ -21,8 +21,8 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        AxisH = Input.GetAxisRaw("Horizontal");
-        AxisV = Input.GetAxisRaw("Vertical");
+        AxisH = Input.GetAxisRaw("Vertical");
+        AxisV = Input.GetAxisRaw("Horizontal");
         DownWalk =Input.GetButton("Walk");
 
         moveVec = new Vector3(AxisH, 0, AxisV).normalized;
