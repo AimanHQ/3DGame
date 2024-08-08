@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -9,9 +10,12 @@ public class Player : MonoBehaviour
     float AxisV;
     bool DownWalk;
     bool jump;
+    bool isJump;
+    bool isDodge;
     Rigidbody rb;
 
     Vector3 moveVec;
+    Vector3 dodgeVec;
     Animator anim;
 
     // Start is called before the first frame update
@@ -28,6 +32,7 @@ public class Player : MonoBehaviour
         Move();
         Turn();
         Jump();
+        Dodge();
     }
 
     void GetInput() 
@@ -42,6 +47,9 @@ public class Player : MonoBehaviour
     {
         moveVec = new Vector3(AxisH, 0, AxisV).normalized;
 
+        if(isDodge)
+            moveVec = dodgeVec;
+            
         transform.position += moveVec * speed * (DownWalk ? 0.3f : 1f) * Time.deltaTime;
 
 
@@ -56,8 +64,37 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        if (jump) {
+        if (jump && moveVec == Vector3.zero && !isJump && !isDodge) {
             rb.AddForce(Vector3.up * 15 , ForceMode.Impulse);
+            anim.SetBool("IsJump", true);
+            anim.SetTrigger("DoJump");
+            isJump = true;
         }
     }
+
+    void Dodge()
+    {
+        if (jump && moveVec != Vector3.zero && !isJump && !isDodge) {
+            dodgeVec = moveVec;
+            speed *= 2;
+            anim.SetTrigger("DoDodge");
+            isDodge = true;
+
+            Invoke("DodgeOut", 0.5f); 
+        }
+    }
+
+    void DodgeOut()
+    {
+        speed *= 0.5f;
+        isDodge = false;
+    }
+
+   void OnCollisionEnter(Collision collision)
+   {
+        if(collision.gameObject.tag == "Floor") {
+            anim.SetBool("IsJump", false);
+            isJump = false;
+        }
+   }
 }
